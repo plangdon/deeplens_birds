@@ -1,0 +1,15 @@
+{
+  "sql": "SELECT * FROM '$aws/things/deeplens_xxxxxxxxxxxxxxxxx/infer'",
+  "ruleDisabled": false,
+  "awsIotSqlVersion": "2016-03-23",
+  "actions": [{
+      "dynamoDB": {
+          "tableName": "backyard_counter",
+          "roleArn": "arn:aws:iam::123456789012:role/my-iot-role",
+          "hashKeyField": "topic",
+          "hashKeyValue": "${topic(2)}",
+          "rangeKeyField": "timestamp",
+          "rangeKeyValue": "${timestamp()}"
+      }
+  }]
+}
