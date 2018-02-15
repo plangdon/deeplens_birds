@@ -31,14 +31,35 @@ var backyard_counter = new Database(config.db.backyard_counter);
 var port = 9080;
 
 app.get('/', function(req, res) {
-  var birdCount = 5;
+  var birdCount = fetchBird(function(data){
+    console.log(data);
+  });
   var squirrelCount = 7;
+
+
 
   var outputHTML = '<table border="1" cellpadding="10" cellspacing="10" style="font-size:2em;margin:0px;padding:10px;"><tr><td>Birds</td><td>Squirrels</td></tr><tr><td>' + birdCount + '</td><td>' + squirrelCount + '</td></tr></table>';
   res.send(outputHTML);
 });
 
 app.listen(port, () => console.log('Example app listening on port 9080!'))
+
+
+var fetchBird = function(callback) {
+
+    msgValue = 'bird';
+    var docClient = new AWS.DynamoDB.DocumentClient();
+
+    var params = {
+        TableName:"backyard_counter",
+        FilterExpression = "CONTAINS(msg, :city)",
+        ExpressionAttributeValues= {":city": "hello"},
+        },
+        ScanIndexForward: false
+    };
+
+    docClient.query(params,callback);
+}
 
 
 // initialize the database tables and then the http server
