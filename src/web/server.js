@@ -21,6 +21,14 @@ if (!_.isEmpty(config.aws.config)) {
     AWS.config.loadFromPath(config.aws.config);
 }
 
+var $credentials = {
+      "accessKeyId": "AKIAIBDTZN6IACU5TILA",
+      "secretAccessKey": "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",
+      "region": "us-east-1"
+}
+
+var DynamoDB = require('aws-dynamodb')($credentials)
+
 
 // load the database module
 var Database = require('./db.js');
@@ -31,35 +39,92 @@ var backyard_counter = new Database(config.db.backyard_counter);
 var port = 9080;
 
 app.get('/', function(req, res) {
-  var birdCount = fetchBird(function(data){
-    console.log(data);
-  });
-  var squirrelCount = 7;
 
+  updateCounts().then(function(){
+    var birdCount = birdData.length;
+    var squirrelCount = squirrelData.length;
 
+    var outputHTML = '<table border="1" cellpadding="10" cellspacing="10" style="font-size:2em;margin:0px;padding:10px;"><tr><td>Birds</td><td>Squirrels</td></tr><tr><td>' + birdCount + '</td><td>' + squirrelCount + '</td></tr></table>';
+    res.send(outputHTML);
+  })
 
-  var outputHTML = '<table border="1" cellpadding="10" cellspacing="10" style="font-size:2em;margin:0px;padding:10px;"><tr><td>Birds</td><td>Squirrels</td></tr><tr><td>' + birdCount + '</td><td>' + squirrelCount + '</td></tr></table>';
-  res.send(outputHTML);
 });
 
 app.listen(port, () => console.log('Example app listening on port 9080!'))
 
 
-var fetchBird = function(callback) {
+var newData = [];
+var birdData = [];
+var squirrelData = [];
+var alldata = [];
 
-    msgValue = 'bird';
-    var docClient = new AWS.DynamoDB.DocumentClient();
 
-    var params = {
-        TableName:"backyard_counter",
-        FilterExpression = "CONTAINS(msg, :city)",
-        ExpressionAttributeValues= {":city": "hello"},
-        },
-        ScanIndexForward: false
-    };
+function updateCounts() {
+    return new Promise(function(resolve, reject) {
+     // continous scan until end of table
+     (function recursive_call( $lastKey ) {
+         DynamoDB
+             .table('backyard_counter')
+             .resume($lastKey)
+             .scan(function( err, data ) {
+                 // handle error, process data ...
+                 newData.push(data);
+                 if (this.LastEvaluatedKey === null) {
+                     counters();
+                     resolve(newData);
+                 }
+                 var $this = this
+                 setTimeout(function() {
+                     recursive_call($this.LastEvaluatedKey);
+                 },1000)
+             })
+     })(null)
+   });
+  }
 
-    docClient.query(params,callback);
-}
+  function counters(){
+    return new Promise(function(resolve, reject) {
+      updateCounts().then(function(){
+
+        var i = 0;
+        for (i=0;i<newData.length;i++) {
+           var ii;
+           var tempData = newData[i];
+          for (ii=0;ii<tempData.length;ii++) {
+            var row = {
+              timestamp : tempData[ii].timestamp,
+              msg: tempData[ii].msg
+            };
+            alldata.push(row);
+          }
+        }
+
+
+
+
+        for (i=0;i<alldata.length;i++) {
+          //newData[i] = JSON.parse(newData[i]);
+          //console.log("++++");
+          //console.log(alldata[i]);
+          //console.log("----");
+          if (alldata[i].hasOwnProperty('msg')) {
+            console.log(alldata[i].msg);
+            if (alldata[i].msg.toString().indexOf('bird')!=-1){
+              birdData.push(alldata[i]);
+            }
+
+            if (alldata[i].msg.toString().indexOf('squirrel')!=-1){
+              squirrelData.push(alldata[i]);
+            }
+          }
+          resolve("done");
+        }
+
+
+
+      });
+    });
+  }
 
 
 // initialize the database tables and then the http server
