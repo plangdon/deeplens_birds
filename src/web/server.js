@@ -40,12 +40,14 @@ var port = 9080;
 
 app.get('/', function(req, res) {
 
-  updateCounts().then(function(){
-    var birdCount = birdData.length;
-    var squirrelCount = squirrelData.length;
+  updateCounts().then(function(data){
+    counters().then(function(){
+      var birdCount = birdData.length;
+      var squirrelCount = squirrelData.length;
 
-    var outputHTML = '<table border="1" cellpadding="10" cellspacing="10" style="font-size:2em;margin:0px;padding:10px;"><tr><td>Birds</td><td>Squirrels</td></tr><tr><td>' + birdCount + '</td><td>' + squirrelCount + '</td></tr></table>';
-    res.send(outputHTML);
+      var outputHTML = '<table border="1" cellpadding="10" cellspacing="10" style="font-size:2em;margin:0px;padding:10px;"><tr><td>Birds</td><td>Squirrels</td></tr><tr><td>' + birdCount + '</td><td>' + squirrelCount + '</td></tr></table>';
+      res.send(outputHTML);
+    });
   })
 
 });
@@ -60,6 +62,11 @@ var alldata = [];
 
 
 function updateCounts() {
+  alldata = [];
+  newData = [];
+  squirrelData = [];
+  birdData = [];
+
     return new Promise(function(resolve, reject) {
      // continous scan until end of table
      (function recursive_call( $lastKey ) {
@@ -70,8 +77,8 @@ function updateCounts() {
                  // handle error, process data ...
                  newData.push(data);
                  if (this.LastEvaluatedKey === null) {
-                     counters();
-                     resolve(newData);
+                     resolve(this.LastEvaluatedKey);
+                     return;
                  }
                  var $this = this
                  setTimeout(function() {
@@ -85,7 +92,7 @@ function updateCounts() {
   function counters(){
     return new Promise(function(resolve, reject) {
       updateCounts().then(function(){
-
+        console.log(newData.length);
         var i = 0;
         for (i=0;i<newData.length;i++) {
            var ii;
@@ -99,29 +106,24 @@ function updateCounts() {
           }
         }
 
-
-
-
+        console.log(alldata.length);
         for (i=0;i<alldata.length;i++) {
           //newData[i] = JSON.parse(newData[i]);
           //console.log("++++");
           //console.log(alldata[i]);
           //console.log("----");
           if (alldata[i].hasOwnProperty('msg')) {
-            console.log(alldata[i].msg);
-            if (alldata[i].msg.toString().indexOf('bird')!=-1){
+            if (alldata[i].msg.hasOwnProperty('bird')) {
+            console.log(alldata[i].msg.bird);
               birdData.push(alldata[i]);
             }
 
-            if (alldata[i].msg.toString().indexOf('squirrel')!=-1){
+            if (alldata[i].msg.hasOwnProperty('squirrel')) {
               squirrelData.push(alldata[i]);
             }
           }
-          resolve("done");
         }
-
-
-
+        resolve("done");
       });
     });
   }
