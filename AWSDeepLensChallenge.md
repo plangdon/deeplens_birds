@@ -1,6 +1,6 @@
 
 ## Inspiration
-I live in an area that is visited by many a variety of birds (and squirrels). I thought it wold be interesting to explore the abilities of Amazon's DeepLens to be able to identify bird species by both visual and song characteristics as well as keep track of how many squirrels disrupt the feeders each day.
+I live in an area that is visited by many a variety of birds (and squirrels). I thought it wold be interesting to explore the abilities of Amazon's DeepLens to be able to identify bird species by both visual and song characteristics as well as keep track of how many squirrels disrupt the feeders each day. 
 
 I had a difficult time finding good seed image libraries for bird species and wanted to get my hands dirty with this new hardware. I thought I could leverage the ease of getting a sample project running on DeepLens to do a course collection of bird images that I could further develop into my species identification model.
 ![enter image description here](https://challengepost-s3-challengepost.netdna-ssl.com/photos/production/software_photos/000/602/625/datas/gallery.jpg)
@@ -11,12 +11,12 @@ The AWS DeepLens hardware allows locally running image processing to occur using
 
 My application, using an included sample MXNet trained model (deeplens-object-detection), identifies the visitors to my bird feeders in my yard. The sample model is able to identify birds with reasonable accuracy. There is no classification for squirrels in this model but they score relatively likely against the "cat" and "dog" classifier (this is a hackathon, isn't it?). Upon a high identification probability score of recognizing a bird or a squirrel, a message is published to a message topic (MQTT) where a lister process will tally the counts and store them to a database where a daily squirrel vs. bird scorecard can be accessed via the web.
 
-![enter image description here](https://challengepost-s3-challengepost.netdna-ssl.com/photos/production/software_photos/000/602/745/datas/gallery.jpg)
+![Web Page](https://challengepost-s3-challengepost.netdna-ssl.com/photos/production/software_photos/000/603/182/datas/gallery.jpg)
 
 > The output isn't pretty but it shows your running identification counts.
 
 This trigger could be extended to take some physical action to deter the squirrel from the feeder, however I am less concerned with that and more interested in collecting positive bird species samples for a more specific bird model.
-
+  
 Initially I utilizes a pre-trained model, but this is the first step in a broader project that is a "train the trainer" application. Using existing coarse models as the source for generating new seed images to train a new model using AWS SageMaker, in this case, to specifically identify bird species.
 
 Check out this video of the detection: [youtube](https://www.youtube.com/watch?v=3Q6jayeE3qY)
@@ -35,12 +35,12 @@ In designing this architecture, I had the following goals:
     * constant video processing in the cloud would incur lots of CPU costs
 * Support image capture locally so device could be deployed to remote location without 100% connectivity or on low-bandwidth networks (cellular)
      * images captured of birds would be incorporated into future training for specific species identification
-     * locally stored images can be off-loaded from device on demand when network is enabled or physically removed via removable media (sneaker-net)
+     * locally stored images can be off-loaded from device on demand when network is enabled or physically removed via removable media (sneaker-net) 
 * Support notifications to the cloud using secure, messaging protocol
 
 ![Solution Architecture](https://challengepost-s3-challengepost.netdna-ssl.com/photos/production/software_photos/000/602/685/datas/gallery.jpg)
 
-1. Running on the AWS DeepLens is [Greengrass Core](https://docs.aws.amazon.com/greengrass/latest/developerguide/what-is-gg.html) allowing Lambda code to run on  DeepLens hardware.
+1. Running on the AWS DeepLens is [Greengrass Core](https://docs.aws.amazon.com/greengrass/latest/developerguide/what-is-gg.html) allowing Lambda code to run on  DeepLens hardware. 
 2. [Lambda](https://aws.amazon.com/lambda/) code deployed to DeepLens processes the image recognition/inference from the loaded model, handles the secure messaging to AWS IoT and saves local files when identification criteria is met.
 3. Messages are  published to [AWS IoT](https://docs.aws.amazon.com/iot/latest/developerguide/what-is-aws-iot.html) using MQTT
 4. [AWS IoT Rules](https://docs.aws.amazon.com/iot/latest/developerguide/iot-rules.html) forward detection data to DynamoDB
@@ -51,7 +51,7 @@ In designing this architecture, I had the following goals:
 Chances are this is your first look at AWS DeepLens so I wanted to cover a quick intro to the hardware and the AWS components used in this project.
 
 ### Amazon DeepLens - What Is It?
-According to Amazon, DeepLens is  "the world’s first deep learning enabled video camera for developers."
+According to Amazon, DeepLens is  "the world’s first deep learning enabled video camera for developers." 
 *From Amazon's DeepLens Portal: [AWS DeepLens Portal](https://aws.amazon.com/deeplens/)*
 
 AWS DeepLens is a wireless video camera and API that you can use to learn how to use the latest Artificial Intelligence (AI) tools and technology and develop your own computer vision applications. Use AWS DeepLens to get hands-on experience using a physical camera that runs real-time computer vision models, examples, and tutorials. Get started with AWS DeepLens by using any of the pretrained models that come with your device. As you become proficienct, you can develop, train, and deploy your own models.
@@ -112,10 +112,10 @@ The following diagram illustrates how AWS DeepLens works.
 * **BUILT-IN STORAGE**
     * 16GB Memory (expandable)
 * **GRAPHICS**
-    * Intel Gen9 Graphics Engine
+    * Intel Gen9 Graphics Engine 
 * **POWER SUPPLY**
     * 5V - 4A
-
+ 
 
 
 ## Prerequisites and Setup
@@ -127,7 +127,7 @@ The following diagram illustrates how AWS DeepLens works.
 ### Getting Started - Device Registration
 Amazon has a really good portal for the initial setup required to prepare your DeepLens and connect it to your network.
 
-Before using AWS DeepLens, you must register your device, connect it, set it up, and verify that it's connected.
+Before using AWS DeepLens, you must register your device, connect it, set it up, and verify that it's connected. 
 The following graphic shows where you perform each step:
 
 ![Registration Steps](https://challengepost-s3-challengepost.netdna-ssl.com/photos/production/software_photos/000/602/458/datas/gallery.jpg)
@@ -169,7 +169,7 @@ The instructions can be found on AWS at: [https://docs.aws.amazon.com/deeplens/l
 ## If you would like to try to replicate my project here are a few steps to follow:
 
 ### Configure AWS
-I am assuming you have some experience of working with AWS, I am including links to help articles to each of the tasks. All services should be configured in the same VPC for security and roles management simplification.
+I am assuming you have some experience of working with AWS, I am including links to help articles to each of the tasks. All services should be configured in the same VPC for security and roles management simplification. 
 
 #### Set Up DynamoDB - [DynamoDB Help](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html)
 1. Log into AWS and navigate to DynamoDB service page [https://console.aws.amazon.com/dynamodb/home](https://console.aws.amazon.com/dynamodb/home)
@@ -183,7 +183,7 @@ I am assuming you have some experience of working with AWS, I am including links
  `SELECT * FROM '$aws/things/deeplens_xxxxxxxxxxxxxxx/infer'`
    * the topic name "deeplens_xxxxxxxxxxxxxxx" will be obtained from your deployed project, it is the bottom of the deployed project page - so this is a little "chicken/egg" scenario: you setup the rule first and just put in dummy field, then come back and update the rule after the project is deployed.
    ![Example of rule](https://challengepost-s3-challengepost.netdna-ssl.com/photos/production/software_photos/000/602/742/datas/gallery.jpg)
-
+   
 #### Set Up Elastic Beanstalk - [Elastic Beanstalk Help](https://aws.amazon.com/documentation/elastic-beanstalk/)
 1. Log into AWS and navigate to Elastic Beanstalk service page [https://console.aws.amazon.com/elasticbeanstalk/home](https://console.aws.amazon.com/elasticbeanstalk/home)
 2. Create an application and call it "birdreport"
@@ -192,7 +192,7 @@ I am assuming you have some experience of working with AWS, I am including links
 5. Upload the zip file of the web server code
 
 
-### Configure DeepLens
+### Configure DeepLens 
 #### Create a Lambda function
 1. Log into AWS and navigate to Lambda service page [https://console.aws.amazon.com/lambda/home](https://console.aws.amazon.com/lambda/home)
 2. On the far right click the orange "Create function" button
@@ -234,19 +234,19 @@ Even though I was able to quickly get up and running using the sample models, I 
 
 
 ## What I learned
-It was interesting to explore the Apache MXNet framework, I had previously used Tensor Flow and I like to make sure I am keeping on top of multiple options when considering technologies. Apache MXNet is a very mature project and active user community.
+It was interesting to explore the Apache MXNet framework, I had previously used Tensor Flow and I like to make sure I am keeping on top of multiple options when considering technologies. Apache MXNet is a very mature project and active user community. 
 
 **More info on Apache MXNet:**
 * [MXNet project site](https://mxnet.apache.org/)
 * [MXNet github](https://github.com/apache/incubator-mxnet)
 
-I learned how this customized hardware and software integration allows for very fast deployment of deep learning methodologies and a quick learning tool for developers to begin exploring the technical area.
+I learned how this customized hardware and software integration allows for very fast deployment of deep learning methodologies and a quick learning tool for developers to begin exploring the technical area. 
 
-I was also very happy to find the extensive documentation that was put together by the AWS DeepLens team. It was a very well documented step by step that was helpful when digging into a totally new platform.
+I was also very happy to find the extensive documentation that was put together by the AWS DeepLens team. It was a very well documented step by step that was helpful when digging into a totally new platform. 
 
 ## What's next for my project
 This first pass of my project is great for weeding out the birds from the squirrels, but I am interested in extending the model to do more detailed identifications. The images captured during the first phase of the project will be a good resource as I extend the training to more specifically identify bird species.
 
 As I mentioned above, currently the SageMaker platform only supports MXNet  models, I am interested in porting over my Tensor Flow trained models. Here is a link to my [git project](https://github.com/plangdon/tf_bird_species) with my training information for bird species identification using Tensor Flow.
 
-I am also very interested in seeing if I can adapt the hardware to include bird songs as part of the identification criteria.
+I am also very interested in seeing if I can adapt the hardware to include bird songs as part of the identification criteria. 
